@@ -18,6 +18,7 @@ var debug = require('debug')('yakbak:server');
  * @param {Object} opts
  * @param {String} opts.dirname The tapes directory
  * @param {Boolean} opts.noRecord if true, requests will return a 404 error if the tape doesn't exist
+ * @param {String} opts.tapeExt The file extension to use for tapes, defaults to j
  * @returns {Function}
  */
 
@@ -30,17 +31,21 @@ module.exports = function (host, opts) {
     debug('req', req.url);
 
     return buffer(req).then(function (body) {
-      var file = path.join(opts.dirname, tapename(req, body));
+      // We have to check for both extensions for backwards-compatibility.
+      var jsFile = path.join(opts.dirname, tapename(req, body, '.js'));
+      var customFile = path.join(opts.dirname, tapename(req, body, '.' + opts.tapeExt));
 
       return Promise.try(function () {
-        return require.resolve(file);
+        return require.resolve(customFile);
       }).catch(ModuleNotFoundError, function (/* err */) {
-
+        return require.resolve(jsFile);
+      }).catch(ModuleNotFoundError, function (/* err */) {
+        
         if (opts.noRecord) {
           throw new RecordingDisabledError('Recording Disabled');
         } else {
           return proxy(req, body, host).then(function (pres) {
-            return record(pres.req, pres, file);
+            return record(pres.req, pres, customFile);
           });
         }
 
@@ -67,10 +72,10 @@ module.exports = function (host, opts) {
    * @returns {String}
    */
 
-  function tapename(req, body) {
+  function tapename(req, body, ext) {
     var hash = opts.hash || messageHash.sync;
 
-    return hash(req, Buffer.concat(body)) + '.js';
+    return hash(req, Buffer.concat(body)) + ext;
   }
 
 };

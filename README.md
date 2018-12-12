@@ -34,6 +34,7 @@ var handler = yakbak('http://api.flickr.com', {
 - `dirname` the path where recorded responses will be written (required).
 - `noRecord` if true, requests will return a 404 error if the tape doesn't exist
 - `hash(req, body)` provide your own IncomingMessage hash function
+- `tapeExt` the file extention for tapes, defaults to "js"
 
 ### with node's http module
 
