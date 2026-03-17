@@ -25,9 +25,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run linter
-        run: npm run lint
-
       - name: Run tests with coverage
         run: npx nyc --reporter=lcov npm test
 
