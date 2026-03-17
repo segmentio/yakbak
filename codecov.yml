@@ -1,0 +1,9 @@
+coverage:
+  status:
+    patch:
+      default:
+        target: 80%
+        informational: false
+
+github_checks:
+  annotations: false
